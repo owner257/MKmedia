@@ -277,9 +277,11 @@ footer{border-top:1px solid var(--line);padding:40px 0 calc(40px + env(safe-area
           <span style="font-size:16px;font-weight:500;color:#8C8C8C;margin-top:6px">Warszawa</span>
         </div>
       </div>
-      <form name="kontakt" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="form">
-        <input type="hidden" name="form-name" value="kontakt">
-        <p class="hp"><label>Nie wypełniaj: <input name="bot-field"></label></p>
+      <form name="kontakt" method="POST" action="https://api.web3forms.com/submit" id="form">
+        <input type="hidden" name="access_key" value="3b44a4af-f562-4948-8ae4-3811680ab933">
+        <input type="hidden" name="subject" value="Nowe zapytanie ze strony mkmedia.waw.pl">
+        <input type="hidden" name="from_name" value="Strona M&amp;K MEDIA">
+        <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div><label for="f-name">Imię</label><input id="f-name" name="imie" autocomplete="given-name" required></div>
         <div><label for="f-company">Firma</label><input id="f-company" name="firma" autocomplete="organization" placeholder="Nazwa firmy lub lokalu"></div>
         <div><label for="f-contact">Telefon lub e-mail</label><input id="f-contact" name="kontakt" required placeholder="Jak mamy się odezwać?"></div>
@@ -311,11 +313,11 @@ form.addEventListener('submit',async e=>{
   e.preventDefault();
   btn.disabled=true;btn.textContent='Wysyłanie…';status.className='form-status';status.textContent='';
   try{
-    const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(new FormData(form)).toString()});
-    if(!r.ok)throw 0;
+    const r=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(form)))});
+    const d=await r.json();if(!r.ok||!d.success)throw new Error(d.message||'');
     form.reset();status.classList.add('ok');status.textContent='Wiadomość wysłana. Odezwiemy się wkrótce.';
-  }catch(_){
-    status.classList.add('err');status.textContent='Nie udało się wysłać. Zadzwoń lub napisz do nas bezpośrednio.';
+  }catch(err){
+    status.classList.add('err');status.textContent='Nie udało się wysłać. Zadzwoń lub napisz do nas bezpośrednio.'+(err&&err.message?' ('+err.message+')':'');
   }
   btn.disabled=false;btn.textContent='Wyślij wiadomość';
 });
